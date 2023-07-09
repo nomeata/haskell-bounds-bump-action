@@ -7,7 +7,6 @@ description: |
 runs:
   using: composite
   steps:
-
   - uses: actions/checkout@v3
 
   - name: cache cabal store
@@ -22,6 +21,7 @@ runs:
       ghc-version: latest
 
   - name: Run cabal outdated
+    shell: bash
     run: |
       cabal outdated
 
@@ -73,6 +73,7 @@ runs:
 
   - name: Build
     if: env.CABAL_COUNT > 0
+    shell: bash
     run: |
       cabal --version
       ghc --version
@@ -82,12 +83,14 @@ runs:
 
   - name: Fetch cabal-plan-bounds
     if: env.CABAL_COUNT > 0
+    shell: bash
     run: |
       curl -L https://github.com/nomeata/cabal-plan-bounds/releases/latest/download/cabal-plan-bounds.linux.gz | gunzip  > /usr/local/bin/cabal-plan-bounds
       chmod +x /usr/local/bin/cabal-plan-bounds
 
   - name: Update .cabal file
     if: env.CABAL_COUNT > 0
+    shell: bash
     run: |
       cabal-plan-bounds --extend dist-newstyle/cache/plan.json -c *.cabal
       git diff *.cabal
