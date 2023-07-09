@@ -83,10 +83,25 @@ The present action aims to cover the 80% of simple cases, if you have some
 special requirements to run the test suite, I suggest you simply copy the steps
 from this repo's `action.yml` and adjust as needed.
 
+### I get errors about caret syntax
+
+If you get this error
+```
+unexpected major bounded version syntax (caret, ^>=) used. To use this syntax
+the package need to specify at least 'cabal-version: 2.0'. Alternatively, if
+broader compatibility is important then use: >=0.10.4.1.2 && <0.11
+expecting "." or "-"
+Error: cabal: Failed parsing "/home/jojo/build/haskell/netrc/netrc.cabal".
+```
+make sure to use `cabal-version: 2.0` or newer in the first line of your cabal file.
+
 ### I do not like the reformatting of the cabal file
 
-I understand, but I fear there is not that much we can do about this. You could
-manually edit the PR before merging, and still get some of the benefits.
+Please open an issue, maybe we can do something. But do not expect much, there
+are too many possible styles around.
+
+If you choose to use [`cabal-plan-bounds`](https://github.com/nomeata/cabal-plan-bounds) to manage
+dependency version bounds for you, it can clean up after this tool.
 
 ### If there is a problem with whether CI tests the upper bounds, isn't there one with other versions as well?
 
