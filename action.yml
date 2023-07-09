@@ -82,9 +82,6 @@ runs:
     if: env.CABAL_COUNT > 0
     shell: bash
     run: |
-      cabal --version
-      ghc --version
-      cabal update
       cabal build --write-ghc-environment-files=always ${{ env.CABAL_FLAGS }}
       cabal test ${{ env.CABAL_FLAGS }}
 
