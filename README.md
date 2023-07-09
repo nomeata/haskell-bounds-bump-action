@@ -102,7 +102,6 @@ We just created this, and expect changes. Use `uses: nomeata/haskell-bounds-bump
 
 Please do! I am certainly no expert on Github Actions.
 
-
 ## Contact
 
 This action was created by Joachim Breitner <mail@joachim-breitner.de>, with input from Andreas Abel, during [MuniHac 2023](https://munihac.de/2023.html).

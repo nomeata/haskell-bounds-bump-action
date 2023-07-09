@@ -82,7 +82,7 @@ runs:
     if: env.CABAL_COUNT > 0
     shell: bash
     run: |
-      cabal build --write-ghc-environment-files=always ${{ env.CABAL_FLAGS }}
+      cabal build --enable-tests --write-ghc-environment-files=always ${{ env.CABAL_FLAGS }}
       cabal test ${{ env.CABAL_FLAGS }}
 
   - name: Fetch cabal-plan-bounds
