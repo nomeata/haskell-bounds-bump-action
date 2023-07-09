@@ -103,6 +103,15 @@ are too many possible styles around.
 If you choose to use [`cabal-plan-bounds`](https://github.com/nomeata/cabal-plan-bounds) to manage
 dependency version bounds for you, it can clean up after this tool.
 
+### Why bump all dependencies together?
+
+In the happy path, this is the least noisy. Of course this can cause problem,
+when one dependency can't be supported for a while, rendering this action useless.
+
+I am not sure if there is a good alternative. Bumping packages independently
+maybe? But maybe they need to be bumped together. Or try all combinations? But
+that has combinatoric explosion.
+
 ### If there is a problem with whether CI tests the upper bounds, isn't there one with other versions as well?
 
 Absolutely! See my [`cabal-plan-bounds`](https://github.com/nomeata/cabal-plan-bounds) project and the discussion on
@@ -110,8 +119,11 @@ Absolutely! See my [`cabal-plan-bounds`](https://github.com/nomeata/cabal-plan-b
 
 ### Why are there no releases of this action?
 
-We just created this, and expect changes. Use `uses: nomeata/haskell-bounds-bump-action@main` if you are bold and want to help test the latest, or use a line like
-`uses: nomeata/haskell-bounds-bump-action@44f853718e3cae367bd0d43372a126cd62796d80` to pin a specific revision.
+We just created this, and expect changes. Use `uses:
+nomeata/haskell-bounds-bump-action@main` if you are bold and want to help test
+the latest, or use a line like `uses:
+nomeata/haskell-bounds-bump-action@44f853718e3cae367bd0d43372a126cd62796d80` to
+pin a specific revision.
 
 ### Can I help
 
@@ -119,4 +131,5 @@ Please do! I am certainly no expert on Github Actions.
 
 ## Contact
 
-This action was created by Joachim Breitner <mail@joachim-breitner.de>, with input from Andreas Abel, during [MuniHac 2023](https://munihac.de/2023.html).
+This action was created by Joachim Breitner <mail@joachim-breitner.de>, with
+input from Andreas Abel, during [MuniHac 2023](https://munihac.de/2023.html).
