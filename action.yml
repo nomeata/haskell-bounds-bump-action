@@ -109,6 +109,8 @@ runs:
       body: ${{ env.GIT_PR_BODY }}
       commit-message: ${{ env.GIT_COMMIT_MESSAGE }}
       delete-branch: true
+      add-paths: |
+        *.cabal
 
   - name: Link to Pull Requst from summary
     if: env.CABAL_COUNT > 0 && ${{ steps.cpr.outputs.pull-request-number }}
