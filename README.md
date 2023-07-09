@@ -60,7 +60,7 @@ set of tests, and turns 🟢. You merge he PR. All well?
 No! If `baz` happens to depend on `bar < 1.2` and no new version is available
 yet, your CI still silently used the old version of `bar`!
 
-This is why this action test the compatibility wih precisely that new version.
+This is why this action test the compatibility with precisely that new version.
 
 (There may be ways to have your existing CI perform such logic, see
 [this `haskell-ci` issue](https://github.com/haskell-CI/haskell-ci/issues/667).
