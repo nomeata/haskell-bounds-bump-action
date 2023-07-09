@@ -55,7 +55,7 @@ enough:
 Imagine your package `foo` depends on `bar < 1.2` and `baz`. Now
 `bar-1.2` is released, and someone (or something) creates a PR against your
 repository changing the version bound to `bar < 1.3`. Your CI runs the usual
-set of tests, and turns 🟢. You merge he PR. All well?
+set of tests, and turns 🟢. You merge the PR. All well?
 
 No! If `baz` happens to depend on `bar < 1.2` and no new version is available
 yet, your CI still silently used the old version of `bar`!
