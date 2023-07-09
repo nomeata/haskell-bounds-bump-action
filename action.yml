@@ -114,4 +114,4 @@ runs:
     if: env.CABAL_COUNT > 0 && ${{ steps.cpr.outputs.pull-request-number }}
     shell: bash
     run: |
-      echo "See [Pull Request ${{ steps.cpr.outputs.pull-request-number }}](${{ steps.cpr.outputs.pull-request-url }})" >> $GITHUB_STEP_SUMMARY
+      echo "See [pull request ${{ steps.cpr.outputs.pull-request-number }}](${{ steps.cpr.outputs.pull-request-url }})" >> $GITHUB_STEP_SUMMARY
