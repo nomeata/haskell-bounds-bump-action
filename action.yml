@@ -114,8 +114,7 @@ runs:
       delete-branch: true
 
   - name: Link to Pull Requst from summary
-    if: env.CABAL_COUNT > 0
-    if: ${{ steps.cpr.outputs.pull-request-number }}
+    if: env.CABAL_COUNT > 0 && ${{ steps.cpr.outputs.pull-request-number }}
     shell: bash
     run: |
       echo "See [Pull Request ${{ steps.cpr.outputs.pull-request-number }}](${{ steps.cpr.outputs.pull-request-url }})" >> $GITHUB_STEP_SUMMARY
