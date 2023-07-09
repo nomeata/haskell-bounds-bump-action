@@ -26,13 +26,20 @@ runs:
       cabal outdated
 
       # also remember the values and the number of changes
+      echo 'Output of `cabal outdated`:' >> $GITHUB_STEP_SUMMARY
+      echo '```' >> $GITHUB_STEP_SUMMARY
+      cabal outdated  >> $GITHUB_STEP_SUMMARY
+      echo '```' >> $GITHUB_STEP_SUMMARY
+
       DELIMITER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
       echo "CABAL_OUTDATED<<$DELIMITER" >> $GITHUB_ENV
       cabal outdated | tail -n +2 | sort | uniq >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
+
       echo "CABAL_COUNT<<$DELIMITER" >> $GITHUB_ENV
       cabal outdated | tail -n +2 | sort | uniq | wc -l >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
+
       echo "CABAL_FLAGS<<$DELIMITER" >> $GITHUB_ENV
       cabal outdated | tail -n +2 | sort | uniq |
         perl -ne 'print "--allow-newer=*:$1 --constraint=$1==$2 " if /([a-zA-Z0-9-]*).*\(latest: (.*)\)/' >> $GITHUB_ENV
@@ -72,11 +79,6 @@ runs:
       cabal outdated >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
-      echo 'Output of `cabal outdated`:' >> $GITHUB_STEP_SUMMARY
-      echo '```' >> $GITHUB_STEP_SUMMARY
-      echo "$CABAL_OUTDATED" >> $GITHUB_STEP_SUMMARY
-      echo '```' >> $GITHUB_STEP_SUMMARY
-
 
   - name: Build
     if: env.CABAL_COUNT > 0
@@ -113,7 +115,7 @@ runs:
         *.cabal
 
   - name: Link to Pull Requst from summary
-    if: env.CABAL_COUNT > 0 && ${{ steps.cpr.outputs.pull-request-number }}
+    if: env.CABAL_COUNT > 0 && steps.cpr.outputs.pull-request-number
     shell: bash
     run: |
       echo "See [pull request ${{ steps.cpr.outputs.pull-request-number }}](${{ steps.cpr.outputs.pull-request-url }})" >> $GITHUB_STEP_SUMMARY
