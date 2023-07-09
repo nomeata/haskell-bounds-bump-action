@@ -36,6 +36,7 @@ runs:
       echo "CABAL_FLAGS<<$DELIMITER" >> $GITHUB_ENV
       cabal outdated | tail -n +2 | sort | uniq |
         perl -ne 'print "--allow-newer=*:$1 --constraint=$1==$2 " if /([a-zA-Z0-9-]*).*\(latest: (.*)\)/' >> $GITHUB_ENV
+      echo "" >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
   - name: Gather PR description
