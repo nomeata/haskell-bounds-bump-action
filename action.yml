@@ -46,6 +46,12 @@ runs:
       echo "" >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
+      echo "CABAL_PLAN_BOUNDS_FLAGS<<$DELIMITER" >> $GITHUB_ENV
+      cabal outdated | tail -n +2 | sort | uniq |
+        perl -ne 'print "--also $1-$2 " if /([a-zA-Z0-9-]*).*\(latest: (.*)\)/' >> $GITHUB_ENV
+      echo "" >> $GITHUB_ENV
+      echo "$DELIMITER" >> $GITHUB_ENV
+
   - name: Gather PR description
     if: env.CABAL_COUNT > 0
     shell: bash
@@ -79,14 +85,6 @@ runs:
       cabal outdated >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
-
-  - name: Build
-    if: env.CABAL_COUNT > 0
-    shell: bash
-    run: |
-      cabal build --enable-tests --write-ghc-environment-files=always ${{ env.CABAL_FLAGS }}
-      cabal test ${{ env.CABAL_FLAGS }}
-
   - name: Fetch cabal-plan-bounds
     if: env.CABAL_COUNT > 0
     shell: bash
@@ -98,8 +96,14 @@ runs:
     if: env.CABAL_COUNT > 0
     shell: bash
     run: |
-      cabal-plan-bounds --extend dist-newstyle/cache/plan.json -c *.cabal
-      git diff *.cabal
+      cabal-plan-bounds --extend ${{ env.CABAL_PLAN_BOUNDS_FLAGS }} -c *.cabal
+
+  - name: Build
+    if: env.CABAL_COUNT > 0
+    shell: bash
+    run: |
+      cabal build --enable-tests --write-ghc-environment-files=always ${{ env.CABAL_FLAGS }}
+      cabal test ${{ env.CABAL_FLAGS }}
 
   - name: Create Pull Request
     id: cpr
