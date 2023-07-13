@@ -26,6 +26,8 @@ Usage
        runs-on: ubuntu-latest
        steps:
        - uses: nomeata/haskell-bounds-bump-action@main
+         with:
+           test: false
    ```
 
 2. Push this to your `main` or `master` branch.
@@ -41,13 +43,13 @@ What does this do?
 
 1. Checks out your repository
 2. Uses `cabal bounds` to recognize bumpable dependencies
-3. Build and tests (`cabal build && cabal test`), forcing the use of that
-   dependency with `--allow-newer` and `--constraint`
-4. Update the cabal file accordingly
+3. Update the cabal file accordingly
+4. _Optionally_ tests these changes using `cabal build && cabal test`, forcing the use of that
+   dependency through `--constraint` and `--allow-newer`
 5. Create a PR (or update an existing PR)
 
-Why not dependabot/renovate? Why run the tests before creating the PR?
-----------------------------------------------------------------------
+When to run the tests, when not?
+--------------------------------
 
 For the typical Haskell CI setup, a PR that just bumps the dependency is not
 enough:
@@ -60,12 +62,51 @@ set of tests, and turns 🟢. You merge the PR. All well?
 No! If `baz` happens to depend on `bar < 1.2` and no new version is available
 yet, your CI still silently used the old version of `bar`!
 
-This is why this action test the compatibility with precisely that new version.
+There are two ways of fixing this:
 
-(There may be ways to have your existing CI perform such logic, see
-[this `haskell-ci` issue](https://github.com/haskell-CI/haskell-ci/issues/667).
-Then the PR creation would be much simpler, and could even be delegated to
-tools like dependabot or renovate.)
+1. (Recommended, but harder)
+
+   Set up your CI pipeline to always perform an “forced upper bounds check” on
+   a pull request; something along these lines may work, of course you have to adjust
+   the condition
+
+       - name: Fetch cabal-force-upper-bounds
+         if: matrix.plan == 'upper-bounds'
+         run: |
+           curl -L https://github.com/nomeata/cabal-force-upper-bound/releases/latest/download/cabal-force-upper-bound.linux.gz | gunzip  > /usr/local/bin/cabal-force-upper-bound
+           chmod +x /usr/local/bin/cabal-force-upper-bound
+
+       - name: Special handling for upper-bounds
+         if: matrix.plan == 'upper-bounds'
+         run: |
+           echo -n "extra_flags=" >> $GITHUB_ENV
+           cabal-force-upper-bound --allow-newer *.cabal >> $GITHUB_ENV
+
+       - run: cabal build --ghc-options -Werror --project-file "ci-configs/${{ matrix.plan }}.config" ${{ env.extra_flags }}
+
+   Maybe in the future, [`haskell-ci` will support this out of the
+   box](https://github.com/haskell-CI/haskell-ci/issues/667).
+
+   This setup is preferrable because it will test any PR, not just those
+   created by this actions, but also those created by you, by contributors or
+   by other dependabot/renovate like bots.
+
+   A possible downside is that if the new dependency cannot be supported, you
+   have this PR open and waiting. (I’d consider that a feature, as it is a
+   reminder of an open issue.)
+
+2. (Simpler)
+
+   Just set `test: true` in this action's `with` clause. Then this action will
+   only create PRs after the package builds and its test pass, with the new
+   version forced to be used.
+
+   This will only work in simple packages where `cabal build && cabal test`
+   works without any special considerations.
+
+   A corner case downside is that after such a bump is merged, the upper bounds
+   are not necessarily tested any more by your normal CI, and you may
+   accidentially break it again.
 
 More questions
 --------------
@@ -75,13 +116,15 @@ More questions
 This is a limitation of Github Actions: [PRs created by actions cannot trigger further
 actions](https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow).
 
-The low-tech work around is to manually close and open the PR to trigger your CI.
+The low-tech work around is to manually close and open the PR to trigger your
+CI. The PR description reminds you to do that.
 
 ### My package cannot be tested that easily
 
-The present action aims to cover the 80% of simple cases, if you have some
+The present action aims to cover the 80% of simple cases. If you have some
 special requirements to run the test suite, I suggest you simply copy the steps
-from this repo's `action.yml` and adjust as needed.
+from this repo's `action.yml` and adjust as needed, or use the recommended
+workflow where your normal CI pipeline tests the upper bounds.
 
 ### I get errors about caret syntax
 
@@ -100,8 +143,8 @@ make sure to use `cabal-version: 2.0` or newer in the first line of your cabal f
 Please open an issue, maybe we can do something. But do not expect much, there
 are too many possible styles around.
 
-If you choose to use [`cabal-plan-bounds`](https://github.com/nomeata/cabal-plan-bounds) to manage
-dependency version bounds for you, it can clean up after this tool.
+If you choose to use
+[`cabal-plan-bounds`](https://github.com/nomeata/cabal-plan-bounds) to manage dependency version bounds for you, the syntax would be the same.
 
 ### Why bump all dependencies together?
 
