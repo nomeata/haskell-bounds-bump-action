@@ -50,7 +50,7 @@ runs:
       echo "CABAL_PACKAGES<<$DELIMITER" >> $GITHUB_ENV
       cabal outdated | tail -n +2 |
         perl -ne 'print "$1\n" if /([a-zA-Z0-9-]*).*\(latest: (.*)\)/' |
-        sort -u | paste -s -d " " >> $GITHUB_ENV
+        jq -n -r -R -c '[inputs] | sort | unique | join(", ")' >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
       echo "CABAL_FLAGS<<$DELIMITER" >> $GITHUB_ENV
