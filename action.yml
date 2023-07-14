@@ -40,21 +40,27 @@ runs:
 
       DELIMITER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
       echo "CABAL_OUTDATED<<$DELIMITER" >> $GITHUB_ENV
-      cabal outdated | tail -n +2 | sort | uniq >> $GITHUB_ENV
+      cabal outdated | tail -n +2 | sort -u >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
       echo "CABAL_COUNT<<$DELIMITER" >> $GITHUB_ENV
-      cabal outdated | tail -n +2 | sort | uniq | wc -l >> $GITHUB_ENV
+      cabal outdated | tail -n +2 | sort -u | wc -l >> $GITHUB_ENV
+      echo "$DELIMITER" >> $GITHUB_ENV
+
+      echo "CABAL_PACKAGES<<$DELIMITER" >> $GITHUB_ENV
+      cabal outdated | tail -n +2 |
+        perl -ne 'print "$1\n" if /([a-zA-Z0-9-]*).*\(latest: (.*)\)/' |
+        sort -u | paste -s -d " " >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
       echo "CABAL_FLAGS<<$DELIMITER" >> $GITHUB_ENV
-      cabal outdated | tail -n +2 | sort | uniq |
+      cabal outdated | tail -n +2 | sort -u |
         perl -ne 'print "--allow-newer=*:$1 --constraint=$1==$2 " if /([a-zA-Z0-9-]*).*\(latest: (.*)\)/' >> $GITHUB_ENV
       echo "" >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
       echo "CABAL_PLAN_BOUNDS_FLAGS<<$DELIMITER" >> $GITHUB_ENV
-      cabal outdated | tail -n +2 | sort | uniq |
+      cabal outdated | tail -n +2 | sort -u |
         perl -ne 'print "--also $1-$2 " if /([a-zA-Z0-9-]*).*\(latest: (.*)\)/' >> $GITHUB_ENV
       echo "" >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
@@ -65,12 +71,7 @@ runs:
     run: |
       DELIMITER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
       echo "GIT_PR_TITLE<<$DELIMITER" >> $GITHUB_ENV
-      if [ "$CABAL_COUNT" = 1 ]
-      then
-        echo "Bumping $CABAL_COUNT dependency" >> $GITHUB_ENV
-      else
-        echo "Bumping $CABAL_COUNT dependencies" >> $GITHUB_ENV
-      fi
+      echo "Bumping $CABAL_PACKAGES" >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
       echo "GIT_PR_BODY<<$DELIMITER" >> $GITHUB_ENV
