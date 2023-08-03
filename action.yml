@@ -61,7 +61,7 @@ runs:
 
       echo "CABAL_PLAN_BOUNDS_FLAGS<<$DELIMITER" >> $GITHUB_ENV
       cabal outdated | tail -n +2 | sort -u |
-        perl -ne '($p, $v) = ($1,$2) if /([a-zA-Z0-9-]*).*\(latest: (.*)\)/; $v =~ s/(\d+\.\d+\.\d+)\.\d+/$1/; print "--also $p-$v "' >> $GITHUB_ENV
+        perl -ne 'print "--also $1-$2 " if /([a-zA-Z0-9-]*).*\(latest: (.*)\)/' >> $GITHUB_ENV
       echo "" >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
