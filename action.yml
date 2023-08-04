@@ -9,6 +9,10 @@ inputs:
     description: "Whether to build and test before opening the PR"
     default: true
     type: boolean
+  ignore:
+    description: "List of packages to ignore (comma-separated, no whitespace)"
+    default: ""
+    type: string
 
 runs:
   using: composite
@@ -30,37 +34,42 @@ runs:
   - name: Run cabal outdated
     shell: bash
     run: |
-      cabal outdated
+      if [ -n "${{ inputs.ignore }}" ]
+      then
+        ignore="--ignore=${{ inputs.ignore }}"
+      fi
+
+      cabal outdated $ignore
 
       # also remember the values and the number of changes
       echo 'Output of `cabal outdated`:' >> $GITHUB_STEP_SUMMARY
       echo '```' >> $GITHUB_STEP_SUMMARY
-      cabal outdated  >> $GITHUB_STEP_SUMMARY
+      cabal outdated  $ignore >> $GITHUB_STEP_SUMMARY
       echo '```' >> $GITHUB_STEP_SUMMARY
 
       DELIMITER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
       echo "CABAL_OUTDATED<<$DELIMITER" >> $GITHUB_ENV
-      cabal outdated | tail -n +2 | sort -u >> $GITHUB_ENV
+      cabal outdated $ignore | tail -n +2 | sort -u >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
       echo "CABAL_COUNT<<$DELIMITER" >> $GITHUB_ENV
-      cabal outdated | tail -n +2 | sort -u | wc -l >> $GITHUB_ENV
+      cabal outdated $ignore | tail -n +2 | sort -u | wc -l >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
       echo "CABAL_PACKAGES<<$DELIMITER" >> $GITHUB_ENV
-      cabal outdated | tail -n +2 |
+      cabal outdated $ignore | tail -n +2 |
         perl -ne 'print "$1\n" if /([a-zA-Z0-9-]*).*\(latest: (.*)\)/' |
         jq -n -r -R -c '[inputs] | sort | unique | join(", ")' >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
       echo "CABAL_FLAGS<<$DELIMITER" >> $GITHUB_ENV
-      cabal outdated | tail -n +2 | sort -u |
+      cabal outdated $ignore | tail -n +2 | sort -u |
         perl -ne 'print "--allow-newer=*:$1 --constraint=$1==$2 " if /([a-zA-Z0-9-]*).*\(latest: (.*)\)/' >> $GITHUB_ENV
       echo "" >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
       echo "CABAL_PLAN_BOUNDS_FLAGS<<$DELIMITER" >> $GITHUB_ENV
-      cabal outdated | tail -n +2 | sort -u |
+      cabal outdated $ignore | tail -n +2 | sort -u |
         perl -ne 'print "--also $1-$2 " if /([a-zA-Z0-9-]*).*\(latest: (.*)\)/' >> $GITHUB_ENV
       echo "" >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
@@ -94,7 +103,7 @@ runs:
         echo "Bumping $CABAL_COUNT dependencies" >> $GITHUB_ENV
       fi
       echo "" >> $GITHUB_ENV
-      cabal outdated >> $GITHUB_ENV
+      echo "$CABAL_OUTDATED" >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
   - name: Fetch cabal-plan-bounds

@@ -155,6 +155,26 @@ I am not sure if there is a good alternative. Bumping packages independently
 maybe? But maybe they need to be bumped together. Or try all combinations? But
 that has combinatoric explosion.
 
+### But there is one dependency I cannot bump, and it blocks the process!
+
+This can happen for example when there is a new release of a boot package like
+`bytestring` that the `ghc` library depends on, and that you therefore cannot
+update. In that case, you can tell the action to ignore a package:
+
+```
+   jobs:
+     bump:
+       runs-on: ubuntu-latest
+       steps:
+       - uses: nomeata/haskell-bounds-bump-action@main
+         with:
+           ignore: bytestring
+```
+
+If need to ignore more than one package, list them separated by commas and no
+spaces (`ignore: bytestring,template-haskell`), just like for the `--ignore`
+flag of `cabal outdated`.
+
 ### If there is a problem with whether CI tests the upper bounds, isn't there one with other versions as well?
 
 Absolutely! See my [`cabal-plan-bounds`](https://github.com/nomeata/cabal-plan-bounds) project and the discussion on
