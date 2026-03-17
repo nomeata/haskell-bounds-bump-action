@@ -59,19 +59,19 @@ runs:
 
       echo "CABAL_PACKAGES<<$DELIMITER" >> $GITHUB_ENV
       $cabal_outdated | tail -n +2 |
-        perl -ne 'print "$1\n" if /([a-zA-Z0-9-]*).*\(latest: (.*)\)/' |
+        perl -ne 'print "$1\n" if /([a-zA-Z][a-zA-Z0-9-]*).*\(latest: (.*)\)/' |
         jq -n -r -R -c '[inputs] | sort | unique | join(", ")' >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
       echo "CABAL_FLAGS<<$DELIMITER" >> $GITHUB_ENV
       $cabal_outdated | tail -n +2 | sort -u |
-        perl -ne 'print "--allow-newer=*:$1 --constraint=$1==$2 " if /([a-zA-Z0-9-]*).*\(latest: (.*)\)/' >> $GITHUB_ENV
+        perl -ne 'print "--allow-newer=*:$1 --constraint=$1==$2 " if /([a-zA-Z][a-zA-Z0-9-]*).*\(latest: (.*)\)/' >> $GITHUB_ENV
       echo "" >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
       echo "CABAL_PLAN_BOUNDS_FLAGS<<$DELIMITER" >> $GITHUB_ENV
       $cabal_outdated | tail -n +2 | sort -u |
-        perl -ne 'print "--also $1-$2 " if /([a-zA-Z0-9-]*).*\(latest: (.*)\)/' >> $GITHUB_ENV
+        perl -ne 'print "--also $1-$2 " if /([a-zA-Z][a-zA-Z0-9-]*).*\(latest: (.*)\)/' >> $GITHUB_ENV
       echo "" >> $GITHUB_ENV
       echo "$DELIMITER" >> $GITHUB_ENV
 
